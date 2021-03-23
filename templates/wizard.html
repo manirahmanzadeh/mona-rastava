@@ -1,0 +1,304 @@
+{% extends "layouts/base.html" %}
+{#{% load static %}#}
+
+
+
+{% block content %}
+
+<h2>Profile Completion</h2>
+<p>Step {{ wizard.steps.step1 }} of {{ wizard.steps.count }}</p>
+{% for field in form %}
+{{ field.error }}
+    {% endfor %}
+
+<form action="/contact/" method="post">{% csrf_token %}
+<table>
+    {{ wizard.management_form }}
+    {% if wizard.form.forms %}
+        {{ wizard.form.management_form }}
+        {% for form in wizard.form.forms %}
+        {{ form }}
+        {% endfor %}
+    {% else %}
+        {{ wizard.form }}
+
+    {% endif %}
+
+
+</table>
+
+<div id="popupform">
+    Position Title: <input id="positionTitle" name="positionTitle"/>
+    <br>
+    <br>
+    Team Member Email: <input id="email" name="email"/>
+    <br>
+    <br>
+    Select Company:
+					<select id="teamMemberCompany" name="teamMemberCompany">
+
+                     <option value="null">Select Company </option>
+
+                        {% for company in companies %}
+							  <option value={{ company.id }}>{{ company.name }} </option>
+                        {% endfor %}
+
+					</select>
+    <br>
+    <br>
+    Fulltime Multiple: <input id="fullTimeMultiple" name="fullTimeMultiple"/>
+    <br>
+    <br>
+    <input type="button" onclick="addMember()" value="Add" />
+    <input type="button" onclick="closePopUp()" value="Close" />
+</div>
+<style>
+
+    #members{
+        border-style:solid ;
+        border-color: white;
+        border-width: 5px;
+        padding: 20px;
+        margin: 30px;
+        margin-right: 300px;
+        border-radius: 10px;
+        background-color: rgb(87,87,130);
+    }
+
+    #popupform{
+        display: none;
+        position: absolute;
+        background-image: linear-gradient(to right, #E14ECB , #C054EF);
+        border-style: solid;
+        border-color: white;
+        border-width: 5px;
+        border-radius: 10px;
+        padding: 20px;
+        color: white;
+    }
+
+.chip {
+    margin-top: 20px;
+  display: inline-block;
+  padding: 0 15px;
+  height: 30px;
+  font-size: 14px;
+  line-height: 30px;
+  border-radius: 25px;
+  background-color: #f1f1f1;
+}
+
+.chip img {
+  float: left;
+  margin: 0 10px 0 -25px;
+  height: 50px;
+  width: 50px;
+  border-radius: 50%;
+}
+
+.closebtn {
+  padding-left: 10px;
+  color: #888;
+  font-weight: bold;
+  float: right;
+  font-size: 25px;
+  cursor: pointer;
+}
+
+.closebtn:hover {
+  color: #000;
+}
+
+</style>
+<script>
+
+
+    function setCookie(cname, cvalue, exdays) {
+      var d = new Date();
+      d.setTime(d.getTime() + (exdays*24*60*60*1000));
+      var expires = "expires="+ d.toUTCString();
+      document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
+    }
+
+    function getCookie(cname) {
+      var name = cname + "=";
+      var ca = document.cookie.split(';');
+      for(var i = 0; i < ca.length; i++) {
+        var c = ca[i];
+        while (c.charAt(0) == ' ') {
+          c = c.substring(1);
+        }
+        if (c.indexOf(name) == 0) {
+          return c.substring(name.length, c.length);
+        }
+      }
+      return "";
+    }
+
+
+    function alertCookies() {
+        alert(document.cookie);
+    }
+
+
+    function addToDatabase() {
+        if({{ wizard.steps.step1 }}  == 2){
+
+        }
+    }
+
+    onload = ()=>{
+        {#alert("ok");#}
+        listStr = getCookie("members");
+        {#listStrWithOutBrackets = listStr.substring(1,listStr.length-1);#}
+        {#listList = listStrWithOutBrackets.split("{");#}
+        var listList = JSON.parse(listStr);
+        listList.map(function (obj) {
+            {# adding to list #}
+            membersList.push(obj);
+
+
+            {# adding to page #}
+            var memberInstance = document.createElement("div");
+            memberInstance.id = obj.newEmail;
+
+            var chip = document.createElement("div");
+            chip.className = "chip";
+            var closeBtn = document.createElement("span");
+            closeBtn.className = "closebtn";
+            closeBtn.innerHTML = "&times;";
+            closeBtn.onclick = function () {
+                removeMember(memberInstance, membersList.indexOf(obj));
+            };
+            chip.appendChild(closeBtn);
+            chip.append(obj.newEmail);
+
+            memberInstance.appendChild(chip);
+
+            document.getElementById("members").appendChild(memberInstance);
+        });
+    }
+
+    function updateCookie() {
+        var json_str = JSON.stringify(membersList);
+        setCookie("members", json_str,1);
+    }
+
+    function emptyValues() {
+        document.getElementById("positionTitle").value = "";
+        document.getElementById("email").value = "";
+        document.getElementById("teamMemberCompany").value = "null";
+        document.getElementById("fullTimeMultiple").value = "";
+    }
+    function validateForm() {
+          var positionTitle = document.getElementById("positionTitle").value;
+          var email = document.getElementById("email").value;
+          var teamMemberCompany = document.getElementById("teamMemberCompany").value;
+          var fullTimeMultiple = document.getElementById("fullTimeMultiple").value;
+          if(positionTitle != "" ){
+                if (/^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/.test(email)){
+                    if(teamMemberCompany != "null"){
+                        if(fullTimeMultiple!=""){
+                            {# validation succed #}
+                            var newTeamMember = {
+                                newPositionTitle : positionTitle,
+                                newEmail : email,
+                                newTeamMemberCompany : teamMemberCompany,
+                                newFullTimeMultiple : fullTimeMultiple
+                            };
+                            membersList.push(newTeamMember);
+                            updateCookie();
+                            emptyValues();
+
+                            var memberInstance = document.createElement("div");
+
+                            memberInstance.id = email;
+
+                            var chip = document.createElement("div");
+                            chip.className = "chip";
+
+                            var closeBtn = document.createElement("span");
+
+                            closeBtn.className = "closebtn";
+                            closeBtn.innerHTML = "&times;";
+                            closeBtn.onclick = function () {
+                                removeMember(memberInstance, membersList.indexOf(newTeamMember));
+                            };
+
+                            chip.appendChild(closeBtn);
+                            chip.append(email);
+
+                            memberInstance.appendChild(chip);
+
+                            document.getElementById("members").appendChild(memberInstance);
+
+                            closePopUp()
+
+                        }else{
+                            alert("FullTimeMultiple is required!")
+                        }
+                    }else{
+                        alert("Company is required!")
+                    }
+                }else{
+                    alert("Email address is not valid!")
+                }
+          }else{
+              alert("Position title is required!")
+          }
+
+    }
+
+    var membersList = [];
+
+    function addMember() {
+        validateForm();
+
+    }
+    function removeMember(memberDiv, index) {
+        memberDiv.style.display = "none";
+        if(index>-1) {
+            membersList.splice(index, 1);
+        }
+        updateCookie();
+    }
+
+    function showPopUp(){
+        document.getElementById("popupform").style.display = "block";
+    }
+    function closePopUp() {
+        document.getElementById("popupform").style.display = "none";
+    }
+</script>
+
+{# pop up button in step2 #}
+    {% if wizard.steps.step1 == 1 %}
+        <br>
+        <input type="button" value="Add Team Members" onclick="showPopUp()"/>
+
+        <br>
+        <div id="members">
+        <p>Team Members:</p>
+
+        </div>
+        <br>
+    {% endif %}
+
+
+
+{% if wizard.steps.prev %}
+    <button name="wizard_goto_step" value="{{ wizard.steps.first }}">
+    First Step
+    </button>
+    <button name="wizard_goto_step" value="{{ wizard.steps.prev }}">
+    Prev Step
+    </button>
+{% endif %}
+
+<input type="submit" value="Submit" onclick="addToDatabase()"/>
+</form>
+
+
+
+{% endblock content %}
+

@@ -1,0 +1,75 @@
+{% extends "layouts/base.html" %}
+
+
+
+{% block content %}
+
+<h2>
+Profile Completed ✔
+</h2>
+
+    <script>
+    onload = ()=>{
+        setCookie("members", "[]",1);
+    }
+
+    function setCookie(cname, cvalue, exdays) {
+      var d = new Date();
+      d.setTime(d.getTime() + (exdays*24*60*60*1000));
+      var expires = "expires="+ d.toUTCString();
+      document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
+    }
+
+    </script>
+
+    <div class="row">
+          <div class="col-md-8">
+            <div class="card">
+
+              <form role="form" method="post" action="">
+
+                {% csrf_token %}
+
+                <div class="card-header">
+
+                  <h6 class="card-category">
+                      {% if msg %}
+                        <span class="text-danger">{{ msg }}</span>
+                      {% else %}
+
+                      {% endif %}
+                  </h6>
+                </div>
+
+
+					<div class="card-body">
+
+
+
+                        {% for company in companies %}
+                            <li style="color: white">{{ company.name }}</li><br>
+{#                        <input type="button" value="{{company.name}}" ><br>#}
+
+                        {% endfor %}
+
+
+                    </p>
+
+            </div>
+
+              </form>
+
+
+          </div>
+
+      <input type="button" value="Add Another Company"  />
+      <input type="button" value="Done" />
+      </div>
+        </div>
+
+{#{% for form in form_data %}#}
+{#    {{ form }}#}
+{#{% endfor %}#}
+
+{% endblock content %}
+
